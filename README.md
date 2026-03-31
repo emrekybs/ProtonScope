@@ -8,5 +8,5 @@ ProtonScope is a fast and minimal OSINT tool for analyzing email addresses, with
  $ pip install aiohttp dnspython
  
 # Usage
- $ python3 protonscope.py
+      $ python3 protonscope.py
 Enter target email when prompted.
