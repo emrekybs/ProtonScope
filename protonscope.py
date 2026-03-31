@@ -8,9 +8,6 @@ import dns.resolver
 import hashlib
 from datetime import datetime, UTC
 
-# ---------------------------
-# COLORS
-# ---------------------------
 class C:
     RED = "\033[91m"
     GREEN = "\033[92m"
@@ -18,8 +15,7 @@ class C:
     CYAN = "\033[96m"
     RESET = "\033[0m"
     BOLD = "\033[1m"
-
-# ---------------------------
+    
 TIMEOUT = aiohttp.ClientTimeout(total=10)
 SEMAPHORE = asyncio.Semaphore(10)
 PROTON_DOMAINS = ["protonmail.com", "protonmail.ch", "proton.me", "pm.me"]
@@ -33,19 +29,17 @@ results = {
     "summary": {}
 }
 
-# ---------------------------
 def banner():
     print(f"""{C.GREEN}{C.BOLD}
 ╔══════════════════════════════════════════════╗
 ║              ProtonScope v1.0                ║
-║     Advanced Email OSINT Intelligence        ║
+║            --Protonmail OSINT--              ║
 ║                                              ║
 ║  Author : Emre Koybasi                       ║
 ║  GitHub : https://github.com/emrekybs        ║
 ╚══════════════════════════════════════════════╝
 {C.RESET}""")
 
-# ---------------------------
 def get_email():
     email = input(f"{C.CYAN}Target Email > {C.RESET}").strip()
     while "@" not in email:
@@ -53,7 +47,6 @@ def get_email():
         email = input(f"{C.CYAN}Target Email > {C.RESET}").strip()
     return email
 
-# ---------------------------
 def generate_variations(email):
     user = email.split("@")[0]
     variations = [f"{user}@{d}" for d in PROTON_DOMAINS]
@@ -64,7 +57,6 @@ def generate_variations(email):
     ]
     results["proton"]["variations"] = variations
 
-# ---------------------------
 async def safe_request(session, method, url, **kwargs):
     async with SEMAPHORE:
         try:
@@ -73,7 +65,6 @@ async def safe_request(session, method, url, **kwargs):
         except:
             return None, None
 
-# ---------------------------
 async def proton_pgp(session, email):
     url = f"https://api.protonmail.ch/pks/lookup?op=index&search={email}"
     _, text = await safe_request(session, "GET", url)
@@ -93,7 +84,6 @@ async def proton_pgp(session, email):
 
     results["proton"]["pgp"] = pgp
 
-# ---------------------------
 def dns_check(domain):
     try:
         mx = dns.resolver.resolve(domain, 'MX')
@@ -104,7 +94,6 @@ def dns_check(domain):
         results["dns"]["mx"] = []
         results["dns"]["uses_proton"] = False
 
-# ---------------------------
 async def gravatar(session, email):
     h = hashlib.md5(email.lower().encode()).hexdigest()
     url = f"https://www.gravatar.com/avatar/{h}?d=404"
@@ -117,7 +106,6 @@ async def gravatar(session, email):
     else:
         results["footprint"]["gravatar"] = "unknown"
 
-# ---------------------------
 async def check_spotify(session, email):
     _, text = await safe_request(session, "GET",
         "https://spclient.wg.spotify.com/signup/public/v1/account",
@@ -170,7 +158,6 @@ async def check_google(session, email):
         return "confirmed"
     return "unknown"
 
-# ---------------------------
 async def account_scan(session, email):
     tasks = {
         "spotify": check_spotify(session, email),
@@ -183,7 +170,6 @@ async def account_scan(session, email):
     }
     results["accounts"] = {k: await v for k, v in tasks.items()}
 
-# ---------------------------
 def build_summary(email):
     confirmed = [k for k, v in results["accounts"].items() if v == "confirmed"]
     score = len(confirmed) * 15
@@ -195,7 +181,6 @@ def build_summary(email):
         "risk_score": score
     }
 
-# ---------------------------
 def color_json(data):
     text = json.dumps(data, indent=4)
     text = re.sub(r'\"(.*?)\":', f'{C.CYAN}"\\1"{C.RESET}:', text)
@@ -205,7 +190,6 @@ def color_json(data):
     text = re.sub(r'false', f'{C.RED}false{C.RESET}', text)
     return text
 
-# ---------------------------
 async def main():
     banner()
 
@@ -230,6 +214,5 @@ async def main():
     print(color_json(results))
     print()
 
-# ---------------------------
 if __name__ == "__main__":
     asyncio.run(main())
