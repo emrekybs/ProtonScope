@@ -1,4 +1,5 @@
 # ProtonScope
+<img src="https://github.com/emrekybs/ProtonScope/blob/main/logo.png">
 Lightweight Email OSINT & Proton Intelligence Tool
 
 # Description
