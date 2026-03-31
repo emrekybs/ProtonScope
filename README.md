@@ -10,3 +10,4 @@ ProtonScope is a fast and minimal OSINT tool for analyzing email addresses, with
 # Usage
      python3 protonscope.py
 Enter target email when prompted.
+<img src="https://github.com/emrekybs/ProtonScope/blob/main/1.png">
